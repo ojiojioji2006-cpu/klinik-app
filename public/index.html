@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Klinik Kesehatan (K2)</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --secondary-color: #0dcaf0;
+            --bg-color: #f4f7f6;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .header-clinic {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            border-radius: 16px;
+            padding: 2rem 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 20px rgba(13, 110, 253, 0.15);
+        }
+
+        /* Menu Navigasi */
+        .nav-menu-container {
+            background: white;
+            border-radius: 16px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        }
+
+        .nav-pills-custom {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .nav-pills-custom .nav-link {
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-weight: 600;
+            color: #6c757d;
+            background: #f8f9fa;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-pills-custom .nav-link:hover {
+            background: #e9ecef;
+            color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .nav-pills-custom .nav-link.active {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+        }
+
+        .nav-pills-custom .nav-link i {
+            font-size: 1.2rem;
+        }
+
+        /* Card Styles */
+        .card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        }
+
+        .card-header-custom {
+            border-bottom: 2px solid #f0f0f0;
+            padding: 1.25rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Queue Item */
+        .queue-item {
+            border-left: 5px solid var(--primary-color);
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+        }
+
+        /* Tab Content Animation */
+        .tab-pane {
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Badge Antrean */
+        .badge-antrean {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        /* 🆕 FITUR BARU: Animasi Panggil Antrean */
+        .queue-item.calling {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%);
+            border-left-color: #ffc107;
+            animation: pulseCalling 1.5s ease-in-out infinite;
+            box-shadow: 0 0 20px rgba(255, 193, 7, 0.5);
+        }
+
+        @keyframes pulseCalling {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.02);
+            }
+        }
+
+        .btn-panggil {
+            border-radius: 20px;
+            padding: 6px 16px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: all 0.3s;
+        }
+
+        .btn-panggil:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+        }
+
+        .btn-panggil:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .speaker-icon {
+            font-size: 1.2rem;
+            animation: speakerWave 1s ease-in-out infinite;
+        }
+
+        @keyframes speakerWave {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.2);
+            }
+        }
+    </style>
+</head>
+
+<body class="p-3 p-md-5">
+    <div class="container" style="max-width: 1100px;">
+
+        <!-- Header -->
+        <div class="header-clinic text-center">
+            <h2 class="mb-2"><i class="bi bi-hospital me-2"></i>Aplikasi Manajemen Klinik (K2)</h2>
+            <p class="mb-0 opacity-75">Sistem Pendaftaran, Antrean Real-time, dan Rekam Medis</p>
+        </div>
+
+        <!-- Menu Navigasi -->
+        <div class="nav-menu-container">
+            <ul class="nav nav-pills nav-menu-custom justify-content-center" id="mainMenu" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="pendaftaran-tab" data-bs-toggle="pill"
+                        data-bs-target="#pendaftaran" type="button" role="tab">
+                        <i class="bi bi-person-plus-fill"></i> Pendaftaran
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="antrean-tab" data-bs-toggle="pill" data-bs-target="#antrean"
+                        type="button" role="tab">
+                        <i class="bi bi-clock-history"></i> Antrean
+                        <span class="badge bg-danger ms-2" id="badgeAntrean">0</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="rekam-medis-tab" data-bs-toggle="pill" data-bs-target="#rekam-medis"
+                        type="button" role="tab">
+                        <i class="bi bi-clipboard2-pulse-fill"></i> Rekam Medis
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="manajemen-tab" data-bs-toggle="pill" data-bs-target="#manajemen"
+                        type="button" role="tab">
+                        <i class="bi bi-database-gear"></i> Manajemen Data
+                    </button>
+                </li>
+            </ul>
+        </div>
+
+        <!-- KONTEN MENU -->
+        <div class="tab-content" id="mainMenuContent">
+
+            <!-- TAB 1: PENDAFTARAN -->
+            <div class="tab-pane fade show active" id="pendaftaran" role="tabpanel">
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header-custom">
+                                <i class="bi bi-person-plus-fill fs-5"></i> Pendaftaran Pasien Baru
+                            </div>
+                            <div class="card-body p-4">
+                                <form id="formPasien">
+                                    <div class="form-floating mb-3">
+                                        <input type="text" class="form-control" id="no_rm" placeholder="RM-001"
+                                            required>
+                                        <label><i class="bi bi-card-text me-1"></i>No. Rekam Medis</label>
+                                    </div>
+                                    <div class="form-floating mb-3">
+                                        <input type="text" class="form-control" id="nama" placeholder="Nama Pasien"
+                                            required>
+                                        <label><i class="bi bi-person me-1"></i>Nama Lengkap Pasien</label>
+                                    </div>
+                                    <div class="form-floating mb-4">
+                                        <input type="date" class="form-control" id="tgl_lahir" required>
+                                        <label><i class="bi bi-calendar-event me-1"></i>Tanggal Lahir</label>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100 py-3">
+                                        <i class="bi bi-ticket-perforated me-2"></i>Daftar & Ambil Antrean
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: ANTREAN -->
+            <div class="tab-pane fade" id="antrean" role="tabpanel">
+                <div class="card">
+                    <div class="card-header-custom d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-clock-history fs-5"></i> Antrean Hari Ini</span>
+                        <span class="badge bg-primary" id="totalAntrean">0 Pasien</span>
+                    </div>
+                    <div class="card-body p-4">
+                        <ul id="listAntrean" class="list-group list-group-flush">
+                            <li class="list-group-item empty-state">
+                                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                Belum ada antrean hari ini
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: REKAM MEDIS -->
+            <div class="tab-pane fade" id="rekam-medis" role="tabpanel">
+                <div class="card">
+                    <div class="card-header-custom">
+                        <i class="bi bi-clipboard2-pulse-fill fs-5"></i> Input Rekam Medis (Dokter)
+                    </div>
+                    <div class="card-body p-4">
+                        <form id="formRM">
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <div class="form-floating">
+                                        <select id="selectPasien" class="form-select" required>
+                                            <option value="">Pilih Pasien...</option>
+                                        </select>
+                                        <label><i class="bi bi-people me-1"></i>Pilih Pasien</label>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-floating">
+                                        <textarea id="keluhan" class="form-control" placeholder="Keluhan"
+                                            style="height: 100px" required></textarea>
+                                        <label><i class="bi bi-chat-quote me-1"></i>Keluhan Pasien</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <textarea id="diagnosis" class="form-control" placeholder="Diagnosis"
+                                            style="height: 120px" required></textarea>
+                                        <label><i class="bi bi-stethoscope me-1"></i>Diagnosis Dokter</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <textarea id="resep" class="form-control" placeholder="Resep"
+                                            style="height: 120px"></textarea>
+                                        <label><i class="bi bi-capsule me-1"></i>Resep Obat</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-4 text-end">
+                                <button type="submit" class="btn btn-success px-5 py-3">
+                                    <i class="bi bi-save me-2"></i>Simpan Rekam Medis
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: MANAJEMEN DATA -->
+            <div class="tab-pane fade" id="manajemen" role="tabpanel">
+                <div class="card border-danger border-opacity-25">
+                    <div class="card-header-custom d-flex justify-content-between align-items-center text-danger">
+                        <span><i class="bi bi-database-gear fs-5"></i> Manajemen Data Pasien</span>
+                        <button class="btn btn-danger btn-sm" onclick="hapusSemuaData()">
+                            <i class="bi bi-trash3-fill me-1"></i>Hapus Semua Data
+                        </button>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>No. RM</th>
+                                        <th>Nama Pasien</th>
+                                        <th>Tanggal Lahir</th>
+                                        <th class="text-end">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabelPasien">
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted py-4">Memuat data...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <footer class="text-center text-muted mt-5 mb-3 small">
+            &copy; 2026 Aplikasi Klinik Kesehatan (K2). All rights reserved.
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // --- FORMAT WAKTU ---
+        function formatWaktuRelatif(dateString) {
+            if (!dateString) return '<span class="badge bg-secondary badge-antrean">Baru daftar</span>';
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return '<span class="badge bg-secondary badge-antrean">Baru daftar</span>';
+            const diff = Math.floor((new Date() - date) / 1000);
+            if (diff < 60) return '<span class="badge bg-info badge-antrean">Baru saja</span>';
+            if (diff < 3600) return `<span class="text-muted small"><i class="bi bi-clock me-1"></i>${Math.floor(diff / 60)} menit lalu</span>`;
+            return `<span class="text-muted small"><i class="bi bi-clock me-1"></i>${Math.floor(diff / 3600)} jam lalu</span>`;
+        }
+
+        setInterval(() => {
+            document.querySelectorAll('.queue-time').forEach(el => {
+                el.innerHTML = formatWaktuRelatif(el.dataset.waktu);
+            });
+        }, 1000);
+
+        // 🆕 --- FITUR PANGGIL ANTREAN DENGAN SUARA ---
+        let isSpeaking = false;
+        let currentCallingId = null;
+
+        function panggilPasien(id, noUrut, nama, noRm) {
+            // Cek apakah browser support Web Speech API
+            if (!('speechSynthesis' in window)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Browser Tidak Support',
+                    text: 'Browser Anda tidak mendukung fitur suara. Silakan gunakan Chrome/Edge.',
+                    confirmButtonColor: '#dc3545'
+                });
+                return;
+            }
+
+            // Hentikan suara sebelumnya jika ada
+            window.speechSynthesis.cancel();
+
+            // Hapus highlight dari item yang sedang dipanggil
+            document.querySelectorAll('.queue-item.calling').forEach(el => {
+                el.classList.remove('calling');
+            });
+
+            // Tambah highlight ke item yang dipanggil
+            const itemElement = document.getElementById(`queue-item-${id}`);
+            if (itemElement) {
+                itemElement.classList.add('calling');
+            }
+
+            // Buat teks yang akan diucapkan
+            const nomorAntrean = `A-${String(noUrut).padStart(3, '0')}`;
+            const teksPanggilan = `Nomor antrean ${nomorAntrean}, atas nama ${nama}, silakan menuju ruang periksa.`;
+
+            // Buat utterance
+            const utterance = new SpeechSynthesisUtterance(teksPanggilan);
+            utterance.lang = 'id-ID'; // Bahasa Indonesia
+            utterance.rate = 0.9; // Kecepatan sedikit lambat agar jelas
+            utterance.pitch = 1;
+            utterance.volume = 1;
+
+            // Cari voice Indonesia jika ada
+            const voices = window.speechSynthesis.getVoices();
+            const voiceId = voices.find(v => v.lang.includes('id')) || voices.find(v => v.lang.includes('ms'));
+            if (voiceId) {
+                utterance.voice = voiceId;
+            }
+
+            // Event saat mulai bicara
+            utterance.onstart = () => {
+                isSpeaking = true;
+                currentCallingId = id;
+                // Disable tombol panggil sementara
+                document.querySelectorAll('.btn-panggil').forEach(btn => {
+                    btn.disabled = true;
+                });
+            };
+
+            // Event saat selesai bicara
+            utterance.onend = () => {
+                isSpeaking = false;
+                currentCallingId = null;
+                // Enable kembali semua tombol
+                document.querySelectorAll('.btn-panggil').forEach(btn => {
+                    btn.disabled = false;
+                });
+                // Hapus highlight
+                if (itemElement) {
+                    itemElement.classList.remove('calling');
+                }
+            };
+
+            // Event error
+            utterance.onerror = (event) => {
+                console.error('Speech error:', event);
+                isSpeaking = false;
+                document.querySelectorAll('.btn-panggil').forEach(btn => {
+                    btn.disabled = false;
+                });
+                if (itemElement) {
+                    itemElement.classList.remove('calling');
+                }
+            };
+
+            // Mulai bicara
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Load voices saat halaman dibuka (penting untuk Chrome)
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.getVoices();
+            window.speechSynthesis.onvoiceschanged = () => {
+                window.speechSynthesis.getVoices();
+            };
+        }
+
+        // --- LOAD DATA ---
+        async function loadData() {
+            try {
+                const resAntrean = await fetch('/api/antrean');
+                const antrean = await resAntrean.json();
+                const list = document.getElementById('listAntrean');
+
+                document.getElementById('badgeAntrean').textContent = antrean.length;
+                document.getElementById('totalAntrean').textContent = `${antrean.length} Pasien`;
+
+                if (!antrean || antrean.length === 0) {
+                    list.innerHTML = '<li class="list-group-item empty-state"><i class="bi bi-inbox fs-1 d-block mb-2"></i>Belum ada antrean hari ini</li>';
+                } else {
+                    list.innerHTML = '';
+                    antrean.forEach(a => {
+                        const isSelesai = a.status === 'Selesai';
+                        const badge = isSelesai
+                            ? '<span class="badge bg-success badge-antrean"><i class="bi bi-check-circle-fill me-1"></i>Selesai</span>'
+                            : '<span class="badge bg-warning text-dark badge-antrean"><i class="bi bi-hourglass-split me-1"></i>Menunggu</span>';
+
+                        // 🆕 Tombol Panggil (hanya untuk status Menunggu)
+                        const tombolPanggil = !isSelesai
+                            ? `<button class="btn btn-primary btn-panggil" onclick="panggilPasien(${a.id}, ${a.no_urut}, '${a.nama.replace(/'/g, "\\'")}', '${a.no_rm}')">
+                                 <i class="bi bi-volume-up-fill me-1"></i>Panggil
+                               </button>`
+                            : '';
+
+                        list.innerHTML += `
+                        <li class="list-group-item queue-item p-4 d-flex justify-content-between align-items-center" id="queue-item-${a.id}">
+                            <div>
+                                <div class="d-flex align-items-center gap-3 mb-2">
+                                    <strong class="text-primary fs-4">A-${String(a.no_urut).padStart(3, '0')}</strong>
+                                    <span class="queue-time" data-waktu="${a.waktu_daftar || ''}">${formatWaktuRelatif(a.waktu_daftar)}</span>
+                                </div>
+                                <div class="text-muted">
+                                    <i class="bi bi-person"></i> ${a.nama} • <i class="bi bi-hash"></i> ${a.no_rm}
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                ${tombolPanggil}
+                                ${badge}
+                            </div>
+                        </li>`;
+                    });
+                }
+
+                const resPasien = await fetch('/api/pasien');
+                const pasien = await resPasien.json();
+                const select = document.getElementById('selectPasien');
+                select.innerHTML = '<option value="">Pilih Pasien...</option>';
+                pasien.forEach(p => {
+                    select.innerHTML += `<option value="${p.id}">${p.nama} (${p.no_rm})</option>`;
+                });
+            } catch (error) { console.error(error); }
+        }
+
+        // --- LOAD MANAJEMEN DATA ---
+        async function loadManajemenData() {
+            try {
+                const res = await fetch('/api/pasien');
+                const pasien = await res.json();
+                const tbody = document.getElementById('tabelPasien');
+
+                if (!pasien || pasien.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4">Belum ada data pasien</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = '';
+                pasien.forEach(p => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><span class="badge bg-secondary">${p.no_rm}</span></td>
+                            <td>${p.nama}</td>
+                            <td>${p.tgl_lahir || '-'}</td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-outline-danger" onclick="hapusSatuPasien(${p.id}, '${p.nama}')">
+                                    <i class="bi bi-trash"></i> Hapus
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch (error) { console.error(error); }
+        }
+
+        // --- HAPUS SATU PASIEN ---
+        function hapusSatuPasien(id, nama) {
+            Swal.fire({
+                title: 'Hapus Pasien?',
+                html: `Data "<b>${nama}</b>" beserta antrean dan rekam medisnya akan dihapus <b>permanen</b>!`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        const res = await fetch(`/api/pasien/${id}`, { method: 'DELETE' });
+                        const data = await res.json();
+                        if (data.success) {
+                            Swal.fire({ icon: 'success', title: 'Terhapus!', text: 'Data pasien berhasil dihapus.', timer: 2000, showConfirmButton: false });
+                            loadManajemenData();
+                            loadData();
+                        }
+                    } catch (error) {
+                        Swal.fire({ icon: 'error', title: 'Gagal!', text: 'Terjadi kesalahan saat menghapus.' });
+                    }
+                }
+            });
+        }
+
+        // --- HAPUS SEMUA DATA ---
+        function hapusSemuaData() {
+            Swal.fire({
+                title: 'Hapus SEMUA Data?',
+                html: 'Semua data pasien, antrean, dan rekam medis akan dihapus <b>permanen</b>!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, Hapus Semua!',
+                cancelButtonText: 'Batal'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        const res = await fetch('/api/pasien/all', { method: 'DELETE' });
+                        const data = await res.json();
+                        if (data.success) {
+                            Swal.fire({ icon: 'success', title: 'Reset Berhasil!', text: 'Semua data telah dibersihkan.', timer: 2000, showConfirmButton: false });
+                            loadManajemenData();
+                            loadData();
+                        }
+                    } catch (error) {
+                        Swal.fire({ icon: 'error', title: 'Gagal!', text: 'Terjadi kesalahan saat menghapus.' });
+                    }
+                }
+            });
+        }
+
+        // --- SUBMIT PENDAFTARAN ---
+        document.getElementById('formPasien').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                no_rm: document.getElementById('no_rm').value,
+                nama: document.getElementById('nama').value,
+                tgl_lahir: document.getElementById('tgl_lahir').value
+            };
+            try {
+                const resPasien = await fetch('/api/pasien', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+                const newPasien = await resPasien.json();
+                if (newPasien.id) {
+                    const resAntrean = await fetch('/api/antrean', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pasien_id: newPasien.id }) });
+                    const antreanData = await resAntrean.json();
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: `Pasien ${data.nama} terdaftar dengan No. Antrean A-${String(antreanData.no_urut).padStart(3, '0')}`,
+                        confirmButtonColor: '#0d6efd',
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
+                    document.getElementById('formPasien').reset();
+                    loadData();
+                    loadManajemenData();
+                }
+            } catch (error) {
+                Swal.fire({ icon: 'error', title: 'Gagal!', text: 'Terjadi kesalahan saat pendaftaran', confirmButtonColor: '#dc3545' });
+            }
+        });
+
+        // --- SUBMIT REKAM MEDIS ---
+        document.getElementById('formRM').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                pasien_id: document.getElementById('selectPasien').value,
+                keluhan: document.getElementById('keluhan').value,
+                diagnosis: document.getElementById('diagnosis').value,
+                resep: document.getElementById('resep').value
+            };
+            try {
+                await fetch('/api/rekam-medis', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Rekam Medis Tersimpan!',
+                    text: 'Data rekam medis berhasil disimpan ke database',
+                    confirmButtonColor: '#198754'
+                });
+                document.getElementById('formRM').reset();
+                loadData();
+            } catch (error) {
+                Swal.fire({ icon: 'error', title: 'Gagal!', text: 'Terjadi kesalahan saat menyimpan', confirmButtonColor: '#dc3545' });
+            }
+        });
+
+        // Load awal
+        loadData();
+        loadManajemenData();
+        setInterval(loadData, 30000);
+    </script>
+</body>
+
+</html>
